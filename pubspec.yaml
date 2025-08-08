@@ -35,6 +35,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   chatwoot_sdk: ^0.0.9
+  dio: ^4.0.6
+  provider: ^6.1.5
+  http: ^0.13.6
+  web_socket_channel: ^2.4.5
+  uuid: ^3.0.7
+  chatwoot_client_sdk: ^0.0.8
 
 dev_dependencies:
   flutter_test:
