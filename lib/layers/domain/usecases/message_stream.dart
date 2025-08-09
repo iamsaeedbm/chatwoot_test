@@ -1,12 +1,12 @@
 import 'package:chatwoot_test/layers/domain/entities/message.dart';
 import 'package:chatwoot_test/layers/domain/repositories/chat_repository.dart';
 
-class InitializeChat {
+class GetMessageStream {
   final ChatRepository repository;
 
-  InitializeChat(this.repository);
+  GetMessageStream(this.repository);
 
-  Future<List<Message>> call() {
-    return repository.initializeChat();
+  Stream<Message> call() {
+    return repository.getMessageStream();
   }
 }

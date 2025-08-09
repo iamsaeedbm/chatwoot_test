@@ -3,42 +3,26 @@ import 'package:chatwoot_test/layers/presentation/provider/chat_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+class ChatPage extends StatefulWidget {
+  const ChatPage({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _textController = TextEditingController();
-
+class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ChatProvider>(context, listen: false).loadInitialMessages();
+      context.read<ChatProvider>().initialize();
     });
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _sendMessage() {
-    final provider = Provider.of<ChatProvider>(context, listen: false);
-    if (_textController.text.isNotEmpty) {
-      provider.sendMessage(_textController.text);
-      _textController.clear();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat with Support')),
+      appBar: AppBar(title: const Text('Support Chat')),
       body: Consumer<ChatProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -51,19 +35,27 @@ class _ChatScreenState extends State<ChatScreen> {
                   reverse: true,
                   padding: const EdgeInsets.all(8.0),
                   itemCount: provider.messages.length,
-                  itemBuilder: (context, index) =>
-                      _buildMessageBubble(provider.messages[index]),
+                  itemBuilder: (context, index) {
+                    final message = provider.messages[index];
+                    return MessageBubble(message: message);
+                  },
                 ),
               ),
-              _buildMessageComposer(),
+              const MessageComposer(),
             ],
           );
         },
       ),
     );
   }
+}
 
-  Widget _buildMessageBubble(Message message) {
+class MessageBubble extends StatelessWidget {
+  const MessageBubble({super.key, required this.message});
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
     final isMe = message.isMe;
     return Row(
       mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -75,7 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           decoration: BoxDecoration(
-            color: isMe ? Colors.blue[100] : Colors.grey[200],
+            color: isMe
+                ? Theme.of(context).primaryColorLight
+                : Colors.grey[200],
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(16),
               topRight: const Radius.circular(16),
@@ -83,13 +77,35 @@ class _ChatScreenState extends State<ChatScreen> {
               bottomRight: isMe ? Radius.zero : const Radius.circular(16),
             ),
           ),
-          child: Text(message.text, style: const TextStyle(fontSize: 16)),
+          child: Text(
+            message.text,
+            style: TextStyle(color: isMe ? Colors.black87 : Colors.black),
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildMessageComposer() {
+class MessageComposer extends StatefulWidget {
+  const MessageComposer({super.key});
+
+  @override
+  State<MessageComposer> createState() => _MessageComposerState();
+}
+
+class _MessageComposerState extends State<MessageComposer> {
+  final _controller = TextEditingController();
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      context.read<ChatProvider>().sendMessage(_controller.text);
+      _controller.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       color: Theme.of(context).cardColor,
@@ -97,7 +113,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: TextField(
-              controller: _textController,
+              controller: _controller,
               decoration: const InputDecoration.collapsed(
                 hintText: 'Type your message...',
               ),

@@ -1,4 +1,4 @@
-import 'package:chatwoot_test/layers/domain/repositories/chatwoot_repository.dart';
+import 'package:chatwoot_test/layers/domain/repositories/chat_repository.dart';
 
 class SendMessage {
   final ChatRepository repository;
